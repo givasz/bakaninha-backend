@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  order       Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  items       Item[]
+}
+
+model Item {
+  id           Int       @id @default(autoincrement())
+  name         String
+  description  String?
+  imageUrl     String?
+  active       Boolean   @default(true)
+  basePrice    Float     @default(0)
+  variantsJson String    @default("[]")
+  categoryId   Int?
+  category     Category? @relation(fields: [categoryId], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+// ── Marmita (new global model) ──────────────────────────────
+// Each MarmitaSize (P/M/G) is linked to one or more global
+// MarmitaItemGroups via MarmitaSizeGroup (which holds per-size
+// config like maxChoices / required).
+// MarmitaItems are global and reference an itemGroup. They show
+// up in every MarmitaSize whose group has a MarmitaSizeGroup
+// linking it — unless allowedSizesJson restricts them.
+
+model MarmitaSize {
+  id        Int                @id @default(autoincrement())
+  name      String
+  price     Float
+  active    Boolean            @default(true)
+  order     Int                @default(0)
+  createdAt DateTime           @default(now())
+  sizeGroups MarmitaSizeGroup[]
+}
+
+model MarmitaItemGroup {
+  id         Int                @id @default(autoincrement())
+  name       String             @unique
+  order      Int                @default(0)
+  createdAt  DateTime           @default(now())
+  items      MarmitaItem[]
+  sizeGroups MarmitaSizeGroup[]
+}
+
+model MarmitaSizeGroup {
+  id            Int              @id @default(autoincrement())
+  marmitaSizeId Int
+  itemGroupId   Int
+  maxChoices    Int              @default(1)
+  required      Boolean          @default(true)
+  order         Int              @default(0)
+  marmitaSize   MarmitaSize      @relation(fields: [marmitaSizeId], references: [id], onDelete: Cascade)
+  itemGroup     MarmitaItemGroup @relation(fields: [itemGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([marmitaSizeId, itemGroupId])
+}
+
+model MarmitaItem {
+  id               Int              @id @default(autoincrement())
+  name             String
+  imageUrl         String?
+  extraPrice       Float            @default(0)
+  active           Boolean          @default(true)
+  order            Int              @default(0)
+  itemGroupId      Int
+  itemGroup        MarmitaItemGroup @relation(fields: [itemGroupId], references: [id], onDelete: Cascade)
+  allowedSizesJson String           @default("[]") // empty array means "all sizes"
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+}
+
+model Schedule {
+  id         Int     @id @default(autoincrement())
+  dayOfWeek  Int     @unique
+  open       Boolean @default(true)
+  openTime   String  @default("11:00")
+  closeTime  String  @default("22:00")
+}

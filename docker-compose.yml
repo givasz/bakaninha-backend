@@ -1,0 +1,24 @@
+# Postgres para desenvolvimento local.
+# Suba com:  docker compose up -d
+# Pare com:  docker compose down
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: bakaninha-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: bakaninha
+      POSTGRES_PASSWORD: bakaninha
+      POSTGRES_DB: bakaninha
+    ports:
+      - "5432:5432"
+    volumes:
+      - bakaninha_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bakaninha -d bakaninha"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  bakaninha_pgdata:
