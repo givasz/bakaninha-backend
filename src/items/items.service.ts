@@ -8,7 +8,7 @@ export class ItemsService {
   findAll() {
     return this.prisma.item.findMany({
       include: { category: true },
-      orderBy: { name: 'asc' },
+      orderBy: [{ order: 'asc' }, { name: 'asc' }],
     });
   }
 
@@ -16,15 +16,25 @@ export class ItemsService {
     return this.prisma.item.findMany({
       where: { active: true },
       include: { category: true },
-      orderBy: { name: 'asc' },
+      orderBy: [{ order: 'asc' }, { name: 'asc' }],
     });
   }
 
   findByCategory(categoryId: number) {
     return this.prisma.item.findMany({
       where: { categoryId, active: true },
-      orderBy: { name: 'asc' },
+      orderBy: [{ order: 'asc' }, { name: 'asc' }],
     });
+  }
+
+  // Reordena uma lista de itens: o índice no array vira o campo `order`.
+  async reorder(ids: number[]) {
+    await this.prisma.$transaction(
+      ids.map((id, index) =>
+        this.prisma.item.update({ where: { id }, data: { order: index } }),
+      ),
+    );
+    return { message: 'Ordem atualizada' };
   }
 
   async findOne(id: number) {
@@ -33,11 +43,17 @@ export class ItemsService {
     return item;
   }
 
-  create(data: any) {
+  async create(data: any) {
     const { variants, ...rest } = data;
+    const last = await this.prisma.item.findFirst({
+      where: { categoryId: rest.categoryId ?? null },
+      orderBy: { order: 'desc' },
+      select: { order: true },
+    });
     return this.prisma.item.create({
       data: {
         ...rest,
+        order: (last?.order ?? -1) + 1,
         variantsJson: variants ? JSON.stringify(variants) : '[]',
       },
       include: { category: true },

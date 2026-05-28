@@ -1,9 +1,12 @@
 import { Controller, Post, Body } from '@nestjs/common';
+import { SettingsService } from '../settings/settings.service';
 
 @Controller('orders')
 export class OrdersController {
+  constructor(private settings: SettingsService) {}
+
   @Post('whatsapp')
-  buildWhatsApp(@Body() order: any) {
+  async buildWhatsApp(@Body() order: any) {
     const phone = process.env.WHATSAPP_NUMBER || '553838411604';
     const lines: string[] = ['*Pedido Bakaninha*\n'];
 
@@ -29,8 +32,16 @@ export class OrdersController {
       }
     }
 
-    const total = (order.items || []).reduce((s: number, i: any) => s + i.price * i.qty, 0);
-    lines.push(`\n*Total:* R$ ${total.toFixed(2)}`);
+    const subtotal = (order.items || []).reduce((s: number, i: any) => s + i.price * i.qty, 0);
+    const deliveryFee = order.type === 'delivery' ? await this.settings.getDeliveryFee() : 0;
+    const total = subtotal + deliveryFee;
+
+    lines.push('');
+    if (deliveryFee > 0) {
+      lines.push(`*Subtotal:* R$ ${subtotal.toFixed(2)}`);
+      lines.push(`*Taxa de entrega:* R$ ${deliveryFee.toFixed(2)}`);
+    }
+    lines.push(`*Total:* R$ ${total.toFixed(2)}`);
     lines.push(`*Pagamento:* ${order.payment}`);
     if (order.observation) lines.push(`*Obs:* ${order.observation}`);
 

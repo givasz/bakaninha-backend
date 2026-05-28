@@ -15,6 +15,10 @@ export class ItemsController {
   @UseGuards(JwtAuthGuard)
   create(@Body() body: any) { return this.service.create(body); }
 
+  @Put('reorder')
+  @UseGuards(JwtAuthGuard)
+  reorder(@Body() body: { ids: number[] }) { return this.service.reorder(body.ids.map(Number)); }
+
   @Put(':id')
   @UseGuards(JwtAuthGuard)
   update(@Param('id') id: string, @Body() body: any) { return this.service.update(+id, body); }

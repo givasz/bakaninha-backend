@@ -26,6 +26,7 @@ model Item {
   active       Boolean   @default(true)
   basePrice    Float     @default(0)
   variantsJson String    @default("[]")
+  order        Int       @default(0)
   categoryId   Int?
   category     Category? @relation(fields: [categoryId], references: [id])
   createdAt    DateTime  @default(now())
@@ -92,4 +93,10 @@ model Schedule {
   open       Boolean @default(true)
   openTime   String  @default("11:00")
   closeTime  String  @default("22:00")
+}
+
+// Configurações globais (key/value) — ex.: deliveryFee
+model Setting {
+  key   String @id
+  value String
 }

@@ -8,6 +8,7 @@ import { MarmitaModule } from './marmita/marmita.module';
 import { OrdersModule } from './orders/orders.module';
 import { UploadModule } from './upload/upload.module';
 import { ScheduleModule } from './schedule/schedule.module';
+import { SettingsModule } from './settings/settings.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ScheduleModule } from './schedule/schedule.module';
     OrdersModule,
     UploadModule,
     ScheduleModule,
+    SettingsModule,
   ],
 })
 export class AppModule {}
