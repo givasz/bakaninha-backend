@@ -64,7 +64,7 @@ export class MarmitaService {
     return { ...size, groups };
   }
 
-  createSize(data: { name: string; price: number; active?: boolean; order?: number }) {
+  createSize(data: { name: string; price: number; imageUrl?: string | null; active?: boolean; order?: number }) {
     return this.prisma.marmitaSize.create({ data });
   }
   updateSize(id: number, data: any) {

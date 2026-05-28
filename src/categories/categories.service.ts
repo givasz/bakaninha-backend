@@ -22,7 +22,7 @@ export class CategoriesService {
     return cat;
   }
 
-  create(data: { name: string; description?: string; order?: number; active?: boolean }) {
+  create(data: { name: string; description?: string; imageUrl?: string | null; order?: number; active?: boolean }) {
     return this.prisma.category.create({ data });
   }
 
