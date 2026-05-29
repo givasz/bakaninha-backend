@@ -48,6 +48,13 @@ export class OrdersController {
     if (order.observation) lines.push(`*Obs:* ${order.observation}`);
 
     const text = encodeURIComponent(lines.join('\n'));
-    return { url: `https://wa.me/${phone}?text=${text}` };
+    return {
+      // url    -> página web (desktop / fallback)
+      // appUrl -> esquema nativo, abre o app direto no celular sem passar
+      //           pela página api.whatsapp.com (que em navegadores antigos
+      //           falha e oferece "baixar" mesmo com o app instalado)
+      url: `https://wa.me/${phone}?text=${text}`,
+      appUrl: `whatsapp://send?phone=${phone}&text=${text}`,
+    };
   }
 }
