@@ -7,7 +7,9 @@ export class OrdersController {
 
   @Post('whatsapp')
   async buildWhatsApp(@Body() order: any) {
-    const phone = process.env.WHATSAPP_NUMBER || '553838411604';
+    // wa.me exige somente dígitos (formato internacional, sem +, espaços,
+    // traços ou parênteses) — caso contrário o WhatsApp diz "número inválido".
+    const phone = (process.env.WHATSAPP_NUMBER || '553838411604').replace(/\D/g, '');
     const lines: string[] = ['*Pedido Bakaninha*\n'];
 
     if (order.name)  lines.push(`*Cliente:* ${order.name}`);
